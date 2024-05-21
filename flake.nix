@@ -246,7 +246,7 @@
           type = "nvim-cmp";
         };
         vim.copilot.chat = {
-          enable = true;
+          enable = false;
         };
         vim.git = {
           enable = true;
@@ -262,7 +262,7 @@
           enableLSP = true;
           enableDebug = true;
           enableFormat = true;
-          enableTreesitter = true;
+          enableTreesitter = false;
           enableExtraDiagnostics = true;
 
           clang.enable = true;

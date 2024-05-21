@@ -70,7 +70,7 @@ in {
 
     lineNumberMode = mkOption {
       type = with types; enum ["relative" "number" "relNumber" "none"];
-      default = "relNumber";
+      default = "number";
       description = "How line numbers are displayed. none, relative, number, relNumber";
     };
 
