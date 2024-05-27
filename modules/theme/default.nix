@@ -40,7 +40,7 @@ in {
             },
           },
         })
-        vim.cmd("colorscheme elflord")
+        vim.cmd("colorscheme nightfox")
       '';
   };
 }
