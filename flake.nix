@@ -1,3 +1,6 @@
+# flake.nix
+# Forked from MerrinX
+# By Erik Sundin
 {
   description = "MerrinX Neovim Configuration";
   inputs = {
@@ -222,6 +225,7 @@
   outputs = {
     nixpkgs,
     flake-utils,
+    self,
     ...
   } @ inputs: let
     rawPlugins = nvimLib.plugins.fromInputs inputs "plugins-";
