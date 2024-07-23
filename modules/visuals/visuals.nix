@@ -173,7 +173,6 @@ in {
     (mkIf cfg.noice.enable {
       vim.startPlugins = [
         "noice"
-        "notify"
       ];
       vim.luaConfigRC.noice =
         nvim.dag.entryAnywhere

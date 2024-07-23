@@ -202,10 +202,6 @@
       url = "github:MunifTanjim/nui.nvim";
       flake = false;
     };
-    plugins-notify = {
-      url = "github:rcarriga/nvim-notify";
-      flake = false;
-    };
     plugins-oil = {
       url = "github:stevearc/oil.nvim";
       flake = false;
@@ -250,7 +246,7 @@
           type = "nvim-cmp";
         };
         vim.copilot.chat = {
-          enable = true;
+          enable = false;
         };
         vim.git = {
           enable = true;
@@ -273,7 +269,7 @@
           css.enable = true;
           haskell.enable = true;
           html.enable = true;
-          java.enable = true;
+          java.enable = false;
           kotlin.enable = true;
           lua.enable = true;
           markdown.enable = true;
@@ -294,7 +290,7 @@
         vim.lsp = {
           formatOnSave = true;
           fidget.enable = true;
-          lightbulb.enable = true;
+          lightbulb.enable = false;
           lspkind.enable = true;
           lspSignature.enable = true;
           trouble.enable = true;
@@ -317,7 +313,7 @@
             enable = true;
           };
           noice = {
-            enable = true;
+            enable = false;
           };
           oil.enable = true;
         };

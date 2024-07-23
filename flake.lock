@@ -346,22 +346,6 @@
         "type": "github"
       }
     },
-    "plugins-notify": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1715959703,
-        "narHash": "sha256-wxyHwL/uFdp6w32CVHgSOWkzRrIRuFvWh+J2401RAAA=",
-        "owner": "rcarriga",
-        "repo": "nvim-notify",
-        "rev": "d333b6f167900f6d9d42a59005d82919830626bf",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rcarriga",
-        "repo": "nvim-notify",
-        "type": "github"
-      }
-    },
     "plugins-nui": {
       "flake": false,
       "locked": {
@@ -817,7 +801,6 @@
         "plugins-lspkind": "plugins-lspkind",
         "plugins-lualine": "plugins-lualine",
         "plugins-noice": "plugins-noice",
-        "plugins-notify": "plugins-notify",
         "plugins-nui": "plugins-nui",
         "plugins-null-ls": "plugins-null-ls",
         "plugins-nvim-autopairs": "plugins-nvim-autopairs",
