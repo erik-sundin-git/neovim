@@ -17,16 +17,35 @@ with builtins; let
         lua
         */
         ''
-          -- Java workspace setup
           local home = os.getenv("HOME")
-          local jdtls = require('jdtls')
+          local jdtls = require("jdtls")
           local root_markers = { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", ".project" }
-          local root_dir = jdtls.setup.find_root(root_markers)
+          local root_dir = require("jdtls.setup").find_root(root_markers)
 
-          -- Function to set root_dir to the parent directory of the .git folder
+          -- If root_dir is nil, use current working directory
+          if root_dir == nil then
+            root_dir = vim.fn.getcwd()
+          end
+
+          local workspace_folder = home .. "/.cache/jdtls/" .. vim.fn.fnamemodify(root_dir, ":p:h:t")
+
+          -- Setting up root_dir
           local function get_root_dir()
             return lspconfig.util.root_pattern(unpack(root_markers))(vim.fn.expand('%:p:h'))
           end
+
+          local jdtls_config_dir = home .. "/.config/jdtls_config"
+          os.execute("mkdir -p " .. jdtls_config_dir)
+
+          -- Copy from nix store to config dir
+          os.execute("cp -r ${cfg.lsp.package}/config_linux/* " .. jdtls_config_dir)
+
+          -- Debuging
+          local bundles = {}
+          local debug_bundles = vim.split(vim.fn.glob("${pkgs.vscode-extensions.vscjava.vscode-java-debug}/share/vscode/extensions/vscjava.vscode-java-debug/server/*.jar"), "\n")
+          local test_bundles = vim.split(vim.fn.glob("${pkgs.vscode-extensions.vscjava.vscode-java-test}/share/vscode/extensions/vscjava.vscode-java-test/server/*.jar"), "\n")
+          vim.list_extend(bundles, debug_bundles)
+          -- vim.list_extend(bundles, test_bundles) TODO: Need to look into
 
           java_on_attach = function(client, bufnr)
             attach_keymaps(client, bufnr)
@@ -37,63 +56,100 @@ with builtins; let
             vim.keymap.set("n", "<leader>jrc", "<Cmd>lua require'jdtls'.extract_constant()<CR>", opts)
             vim.keymap.set("x", "<leader>jrc", "<Esc><Cmd>lua require'jdtls'.extract_constant(true)<CR>", opts)
             vim.keymap.set("x", "<leader>jrm", "<Esc><Cmd>lua require'jdtls'.extract_method(true)<CR>", opts)
+
+            -- Set autocommands conditional on server_capabilities
             vim.lsp.codelens.refresh()
           end
 
-          local workspace_folder = home .. "/.cache/jdtls/" .. vim.fn.fnamemodify(root_dir, ":p:h:t")
-          local jdtls_config_dir = home .. "/.config/jdtls_config"
-          os.execute("mkdir -p " .. jdtls_config_dir)
-
-          -- Copy from nix store to config dir
-          os.execute("cp -r ${cfg.lsp.package}/config_linux/* " .. jdtls_config_dir)
-
-
-          lspconfig.jdtls.setup{
-            capabilities = capabilities;
-            on_attach = java_on_attach,
-            cmd = {
-              "${cfg.lsp.package}/bin/jdtls",
-              "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-              "-Dosgi.bundles.defaultStartLevel=4",
-              "-Dosgi.sharedConfiguration.area=${pkgs.jdt-language-server}/share/config",
-              "-Declipse.product=org.eclipse.jdt.ls.core.product",
-              "-Dlog.protocol=true",
-              "-Dlog.level=ALL",
-              "-Xms1g",
-              "--add-modules=ALL-SYSTEM",
-              "--add-opens",
-              "java.base/java.util=ALL-UNNAMED",
-              "--add-opens",
-              "java.base/java.lang=ALL-UNNAMED",
-              "-jar",
-              "-configuration", jdtls_config_dir,
-              "-data", workspace_folder,
+          local config = {
+            flags = {
+              allow_incremental_sync = true,
             };
-            root_dir = get_root_dir;
-            init_options = {
-              bundles = {
-                vim.fn.glob("${pkgs.vscode-extensions.vscjava.vscode-java-debug}/share/vscode/extensions/vscjava.vscode-java-debug/server/com.microsoft.java.debug.plugin-*.jar", 1),
-                vim.fn.glob("${pkgs.vscode-extensions.vscjava.vscode-java-test}/share/vscode/extensions/vscjava.vscode-java-test/server/*.jar", 1)
+            capabilities = capabilities,
+            on_attach = java_on_attach,
+          };
+
+          config.settings = {
+            java = {
+              referencesCodeLens = {enabled = true};
+              signatureHelp = { enabled = true };
+              implementationsCodeLens = { enabled = true };
+              contentProvider = { preferred = 'fernflower' };
+              completion = {
+                favoriteStaticMembers = {
+                  "org.hamcrest.MatcherAssert.assertThat",
+                  "org.hamcrest.Matchers.*",
+                  "org.hamcrest.CoreMatchers.*",
+                  "org.junit.jupiter.api.Assertions.*",
+                  "java.util.Objects.requireNonNull",
+                  "java.util.Objects.requireNonNullElse",
+                  "org.mockito.Mockito.*"
+                }
+              };
+              sources = {
+                organizeImports = {
+                  starThreshold = 9999;
+                  staticStarThreshold = 9999;
+                };
+              };
+              configuration = {
+                runtimes = {
+                  {
+                    name = "JavaSE-17",
+                    path = "${pkgs.jdk17}/lib/openjdk/",
+                  },
+                  {
+                    name = "JavaSE-21",
+                    path = "${pkgs.jdk21}/lib/openjdk/",
+                  },
+                }
               };
             };
-            settings = {
-              java = {
-                referencesCodeLens = {enabled = true};
-                signatureHelp = { enabled = true };
-                implementationsCodeLens = { enabled = true };
-                contentProvider = { preferred = 'fernflower' };
-              },
-            };
-            handlers = {
-              ["language/status"] = function(_, result)
-                vim.print('***')
+          };
+          config.cmd = {
+            "${cfg.lsp.package}/bin/jdtls",
+            "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+            "-Dosgi.bundles.defaultStartLevel=4",
+            "-Dosgi.sharedConfiguration.area=${pkgs.jdt-language-server}/share/config",
+            "-Declipse.product=org.eclipse.jdt.ls.core.product",
+            "-Dlog.protocol=true",
+            "-Dlog.level=ALL",
+            "-Xms1g",
+            "--add-modules=ALL-SYSTEM",
+            "--add-opens",
+            "java.base/java.util=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.lang=ALL-UNNAMED",
+            "-jar",
+            "-configuration", jdtls_config_dir,
+            "-data", workspace_folder,
+          };
+          config.root_dir = get_root_dir()
+          config.on_init = function(client, _)
+            client.notify('workspace/didChangeConfiguration', { settings = config.settings })
+          end
+
+          local extendedClientCapabilities = require'jdtls'.extendedClientCapabilities
+          extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+          config.init_options = {
+            bundles = bundles,
+            extendedClientCapabilities = extendedClientCapabilities;
+          };
+          config.filetypes = {"java"};
+          local nvim_jdtls_group = vim.api.nvim_create_augroup("nvim-jdtls", { clear = true })
+
+          vim.api.nvim_create_autocmd(
+            "FileType",
+            {
+              pattern = { "java" },
+              callback = function()
+                jdtls.start_or_attach(config)
+                jdtls.setup_dap({ hotcodereplace = "auto" })
+                -- jdtls.dap.setup_dap_main_class_configs() TODO: return a nil
               end,
-              ['$/progress'] = function(_, result, ctx)
-                vim.print('---')
-              end
-            };
-            filetypes = { "java" };
-          }
+              group = nvim_jdtls_group,
+            }
+          )
         '';
     };
   };

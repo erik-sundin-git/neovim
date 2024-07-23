@@ -154,8 +154,8 @@
     };
 
     # theme
-    plugins-nightfox = {
-      url = "github:EdenEast/nightfox.nvim";
+    plugins-tokyonight = {
+      url = "github:folke/tokyonight.nvim";
       flake = false;
     };
 
@@ -166,6 +166,10 @@
     };
     plugins-lazygit = {
       url = "github:kdheepak/lazygit.nvim";
+      flake = false;
+    };
+    plugins-undotree = {
+      url = "github:jiaoshijie/undotree";
       flake = false;
     };
 
@@ -202,8 +206,8 @@
       url = "github:rcarriga/nvim-notify";
       flake = false;
     };
-    plugins-nvim-tree-lua = {
-      url = "github:kyazdani42/nvim-tree.lua";
+    plugins-oil = {
+      url = "github:stevearc/oil.nvim";
       flake = false;
     };
 
@@ -246,7 +250,7 @@
           type = "nvim-cmp";
         };
         vim.copilot.chat = {
-          enable = false;
+          enable = true;
         };
         vim.git = {
           enable = true;
@@ -262,7 +266,7 @@
           enableLSP = true;
           enableDebug = true;
           enableFormat = true;
-          enableTreesitter = false;
+          enableTreesitter = true;
           enableExtraDiagnostics = true;
 
           clang.enable = true;
@@ -280,10 +284,12 @@
             crates.enable = true;
           };
           scala.enable = true;
+          shell.enable = true;
           sql.enable = true;
           tailwind.enable = true;
           ts.enable = true;
           vue.enable = true;
+          xml.enable = true;
         };
         vim.lsp = {
           formatOnSave = true;
@@ -293,13 +299,17 @@
           lspSignature.enable = true;
           trouble.enable = true;
         };
-        vim.debug.ui.enable = true;
+        vim.debug = {
+          virtualText.enable = true;
+          ui.enable = true;
+        };
         vim.sql.enable = true;
+        vim.undo.enable = true;
         vim.visuals = {
           enable = true;
           lualine = {
             enable = true;
-            theme = "nightfox";
+            theme = "tokyonight";
           };
           nvimWebDevicons.enable = true;
           autopairs.enable = true;
@@ -309,7 +319,7 @@
           noice = {
             enable = true;
           };
-          nvimtree.enable = true;
+          oil.enable = true;
         };
         vim.theme.enable = true;
         vim.telescope.enable = true;
